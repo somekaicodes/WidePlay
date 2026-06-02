@@ -19,9 +19,16 @@ public static class MauiProgram
 			});
 
 		// Services — singletons so BLE and Spotify state persists for the app lifetime.
-		// Swap Mock* for real implementations once hardware/Spotify auth is ready.
+		// Flip to false once you've added your Spotify Client ID in SpotifyConfig.cs
+		// (and have a Premium account) to use the real Spotify integration.
+		bool useMockSpotify = true;
+
 		builder.Services.AddSingleton<IBleService, MockBleService>();
-		builder.Services.AddSingleton<ISpotifyService, MockSpotifyService>();
+
+		if (useMockSpotify)
+			builder.Services.AddSingleton<ISpotifyService, MockSpotifyService>();
+		else
+			builder.Services.AddSingleton<ISpotifyService, SpotifyService>();
 
 		// ViewModels — singletons so session state (listener count, current song) survives navigation
 		builder.Services.AddSingleton<SessionViewModel>();
