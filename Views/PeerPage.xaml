@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WidePlay.ViewModels"
+             x:Class="WidePlay.Views.PeerPage"
+             x:DataType="vm:PeerViewModel"
+             BackgroundColor="#141414"
+             Shell.NavBarIsVisible="False">
+
+    <Grid Padding="28" RowDefinitions="Auto,*,Auto" RowSpacing="0">
+
+        <!-- Host banner -->
+        <VerticalStackLayout Grid.Row="0" Spacing="2" Margin="0,40,0,0" HorizontalOptions="Center">
+            <Label Text="LISTENING TO" FontSize="12" FontAttributes="Bold"
+                   TextColor="#6E6E6E" HorizontalOptions="Center" />
+            <Label Text="{Binding HostName, StringFormat='{0}'}" FontSize="18"
+                   FontAttributes="Bold" TextColor="#512BD4" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Now playing (centered, read-only) -->
+        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center">
+            <Border WidthRequest="260" HeightRequest="260" HorizontalOptions="Center"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 18" BackgroundColor="#1E1E1E">
+                <Image Source="{Binding CurrentSong.AlbumArtUrl}" Aspect="AspectFill" />
+            </Border>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{Binding CurrentSong.Title, FallbackValue='Waiting for host…'}"
+                       FontSize="24" FontAttributes="Bold" TextColor="White"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                <Label Text="{Binding CurrentSong.Artist}" FontSize="16"
+                       TextColor="#919191" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- Leave -->
+        <Button Grid.Row="2" Text="Leave Session"
+                Command="{Binding LeaveSessionCommand}"
+                BackgroundColor="Transparent" TextColor="#FF5A5A"
+                FontSize="15" HeightRequest="48" Margin="0,0,0,8" />
+    </Grid>
+</ContentPage>

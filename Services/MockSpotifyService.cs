@@ -47,14 +47,14 @@ public class MockSpotifyService : ISpotifyService
     public async Task PauseAsync()
     {
         await Task.Delay(100);
-        _state = _state with { IsPlaying = false };
+        _state.IsPlaying = false;
         _playbackStateChanged.OnNext(_state);
     }
 
     public async Task ResumeAsync()
     {
         await Task.Delay(100);
-        _state = _state with { IsPlaying = true };
+        _state.IsPlaying = true;
         _playbackStateChanged.OnNext(_state);
     }
 

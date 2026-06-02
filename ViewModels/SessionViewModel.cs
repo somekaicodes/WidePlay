@@ -50,7 +50,7 @@ public partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task HostSession()
     {
-        await _ble.StartHostingAsync($"{DeviceInfo.Current.Name}'s Session");
+        await _ble.StartHostingAsync(DeviceInfo.Current.Name);
         await Shell.Current.GoToAsync("//PlayerPage");
     }
 

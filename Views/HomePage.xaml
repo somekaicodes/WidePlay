@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WidePlay.ViewModels"
+             xmlns:models="clr-namespace:WidePlay.Models"
+             xmlns:conv="clr-namespace:WidePlay.Converters"
+             x:Class="WidePlay.Views.HomePage"
+             x:Name="page"
+             x:DataType="vm:SessionViewModel"
+             BackgroundColor="#141414"
+             Shell.NavBarIsVisible="False">
+
+    <Grid Padding="28" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="20">
+
+        <!-- Logo / title -->
+        <VerticalStackLayout Grid.Row="0" Spacing="4" Margin="0,40,0,30" HorizontalOptions="Center">
+            <Label Text="Wide Play" FontSize="36" FontAttributes="Bold"
+                   TextColor="White" HorizontalOptions="Center" />
+            <Label Text="Play together, nearby" FontSize="14"
+                   TextColor="#919191" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Spotify connection status -->
+        <Border Grid.Row="1" StrokeShape="RoundRectangle 12"
+                Stroke="#2A2A2A" BackgroundColor="#1E1E1E" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Label Grid.Column="0" VerticalOptions="Center"
+                       Text="{Binding IsSpotifyConnected, StringFormat='Spotify: {0}'}"
+                       TextColor="White" FontSize="14" />
+                <Button Grid.Column="1" Text="Connect"
+                        Command="{Binding ConnectSpotifyCommand}"
+                        IsVisible="{Binding IsSpotifyConnected, Converter={x:Static conv:InverseBoolConverter.Instance}}"
+                        BackgroundColor="#1DB954" TextColor="White"
+                        FontSize="13" Padding="16,6" CornerRadius="16" HeightRequest="36" />
+            </Grid>
+        </Border>
+
+        <!-- Host -->
+        <Button Grid.Row="2" Text="Host a Session"
+                Command="{Binding HostSessionCommand}"
+                BackgroundColor="#512BD4" TextColor="White"
+                FontSize="17" FontAttributes="Bold"
+                HeightRequest="56" CornerRadius="14" />
+
+        <!-- Join (kicks off scanning) -->
+        <Button Grid.Row="3" Text="Join a Session"
+                Command="{Binding StartScanningCommand}"
+                BackgroundColor="Transparent" TextColor="White"
+                BorderColor="#512BD4" BorderWidth="1.5"
+                FontSize="17" FontAttributes="Bold"
+                HeightRequest="56" CornerRadius="14" />
+
+        <!-- Nearby sessions -->
+        <Grid Grid.Row="4" RowDefinitions="Auto,Auto,*" RowSpacing="10" Margin="0,8,0,0">
+            <Label Grid.Row="0" Text="NEARBY SESSIONS" FontSize="12"
+                   FontAttributes="Bold" TextColor="#6E6E6E" />
+
+            <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsScanning}"
+                               IsVisible="{Binding IsScanning}"
+                               Color="#512BD4" HorizontalOptions="Start" />
+
+            <CollectionView Grid.Row="2" ItemsSource="{Binding DiscoveredSessions}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:PeerDevice">
+                        <Border StrokeShape="RoundRectangle 12" Stroke="#2A2A2A"
+                                BackgroundColor="#1E1E1E" Padding="16,12" Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="{Binding Name}"
+                                       TextColor="White" FontSize="16" VerticalOptions="Center" />
+                                <Button Grid.Column="1" Text="Join"
+                                        Command="{Binding Source={x:Reference page}, Path=BindingContext.JoinSessionCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#512BD4" TextColor="White"
+                                        FontSize="13" Padding="18,6" CornerRadius="16" HeightRequest="36" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
+</ContentPage>

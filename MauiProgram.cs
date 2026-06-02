@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using WidePlay.Services;
 using WidePlay.ViewModels;
+using WidePlay.Views;
 
 namespace WidePlay;
 
@@ -27,6 +28,12 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PlayerViewModel>();
 		builder.Services.AddSingleton<PeerViewModel>();
 		builder.Services.AddSingleton<SearchViewModel>();
+
+		// Pages — resolved by DI so their ViewModels are injected via constructor
+		builder.Services.AddSingleton<HomePage>();
+		builder.Services.AddSingleton<PlayerPage>();
+		builder.Services.AddSingleton<PeerPage>();
+		builder.Services.AddSingleton<SearchPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

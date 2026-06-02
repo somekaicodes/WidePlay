@@ -28,6 +28,12 @@ public partial class PlayerViewModel : ObservableObject
         ? (double)PositionMs / CurrentSong.DurationMs
         : 0;
 
+    // Glyph shown on the play/pause button, driven by IsPlaying
+    public string PlayPauseGlyph => IsPlaying ? "⏸" : "▶";
+
+    // "3 listening" / "1 listening" — friendly listener count label
+    public string ListenerLabel => $"{ListenerCount} listening";
+
     public PlayerViewModel(IBleService ble, ISpotifyService spotify)
     {
         _ble = ble;
@@ -46,9 +52,11 @@ public partial class PlayerViewModel : ObservableObject
             MainThread.BeginInvokeOnMainThread(() => ListenerCount++));
     }
 
-    // Recompute ProgressValue whenever position or song changes
+    // Recompute derived properties whenever their inputs change
     partial void OnPositionMsChanged(int value) => OnPropertyChanged(nameof(ProgressValue));
     partial void OnCurrentSongChanged(Song? value) => OnPropertyChanged(nameof(ProgressValue));
+    partial void OnIsPlayingChanged(bool value) => OnPropertyChanged(nameof(PlayPauseGlyph));
+    partial void OnListenerCountChanged(int value) => OnPropertyChanged(nameof(ListenerLabel));
 
     [RelayCommand]
     private async Task PlayPause()

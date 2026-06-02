@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WidePlay.ViewModels"
+             xmlns:models="clr-namespace:WidePlay.Models"
+             x:Class="WidePlay.Views.SearchPage"
+             x:Name="page"
+             x:DataType="vm:SearchViewModel"
+             BackgroundColor="#141414"
+             Shell.NavBarIsVisible="False">
+
+    <Grid Padding="20" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+
+        <!-- Search bar -->
+        <Border Grid.Row="0" StrokeShape="RoundRectangle 12" Stroke="#2A2A2A"
+                BackgroundColor="#1E1E1E" Margin="0,12,0,0">
+            <SearchBar Placeholder="Search songs or artists"
+                       Text="{Binding SearchQuery}"
+                       SearchCommand="{Binding SearchCommand}"
+                       TextColor="White" PlaceholderColor="#6E6E6E"
+                       BackgroundColor="Transparent" CancelButtonColor="#512BD4" />
+        </Border>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsSearching}"
+                           IsVisible="{Binding IsSearching}"
+                           Color="#512BD4" HorizontalOptions="Start" />
+
+        <!-- Results -->
+        <CollectionView Grid.Row="2" ItemsSource="{Binding SearchResults}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Song">
+                    <Grid Padding="0,8" ColumnDefinitions="56,*" ColumnSpacing="14">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference page}, Path=BindingContext.SelectSongCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+
+                        <Border Grid.Column="0" WidthRequest="56" HeightRequest="56"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 8" BackgroundColor="#1E1E1E">
+                            <Image Source="{Binding AlbumArtUrl}" Aspect="AspectFill" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding Title}" FontSize="16" TextColor="White" />
+                            <Label Text="{Binding Artist}" FontSize="14" TextColor="#919191" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>
