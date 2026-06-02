@@ -58,6 +58,15 @@ public class MockSpotifyService : ISpotifyService
         _playbackStateChanged.OnNext(_state);
     }
 
+    public async Task SkipPreviousAsync()
+    {
+        await Task.Delay(200);
+        var currentIndex = _state.CurrentSong is null ? 0 : FakeCatalog.IndexOf(_state.CurrentSong);
+        var prev = FakeCatalog[(currentIndex - 1 + FakeCatalog.Count) % FakeCatalog.Count];
+        _state = new PlaybackState { CurrentSong = prev, IsPlaying = true, PositionMs = 0 };
+        _playbackStateChanged.OnNext(_state);
+    }
+
     public async Task SkipNextAsync()
     {
         await Task.Delay(200);

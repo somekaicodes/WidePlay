@@ -35,16 +35,20 @@ public class MockBleService : IBleService
         _commandReceived.OnNext(command);
     }
 
-    public async Task StartScanningAsync()
+    public Task StartScanningAsync()
     {
         _scanCts = new CancellationTokenSource();
         var token = _scanCts.Token;
 
-        await Task.Run(async () =>
+        // Fire and forget — results arrive via SessionDiscovered observable
+        _ = Task.Run(async () =>
         {
             await Task.Delay(800, token);
-            _sessionDiscovered.OnNext(new PeerDevice { Id = "host-001", Name = "Kai's Session", SignalStrength = -50, IsConnected = false });
+            if (!token.IsCancellationRequested)
+                _sessionDiscovered.OnNext(new PeerDevice { Id = "host-001", Name = "Kai's Session", SignalStrength = -50, IsConnected = false });
         }, token);
+
+        return Task.CompletedTask;
     }
 
     public async Task SendJoinSignalAsync(PeerDevice host, string deviceName)

@@ -23,6 +23,8 @@ public interface ISpotifyService
 
     Task ResumeAsync();
 
+    Task SkipPreviousAsync();
+
     Task SkipNextAsync();
 
     // Poll current playback state from Spotify Web API and push to PlaybackStateChanged
