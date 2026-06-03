@@ -10,7 +10,6 @@ namespace WidePlay.ViewModels;
 public partial class SearchViewModel : ObservableObject
 {
     private readonly ISpotifyService _spotify;
-    private readonly IBleService _ble;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -20,10 +19,9 @@ public partial class SearchViewModel : ObservableObject
 
     public ObservableCollection<Song> SearchResults { get; } = [];
 
-    public SearchViewModel(ISpotifyService spotify, IBleService ble)
+    public SearchViewModel(ISpotifyService spotify)
     {
         _spotify = spotify;
-        _ble = ble;
     }
 
     [RelayCommand]
@@ -41,12 +39,12 @@ public partial class SearchViewModel : ObservableObject
         IsSearching = false;
     }
 
-    // Tapping a result plays it on the host and broadcasts the URI to all peers
+    // Tapping a result plays it on the host; the host's PlayerViewModel sees the
+    // playback change and broadcasts the new track to all peers.
     [RelayCommand]
     private async Task SelectSong(Song song)
     {
         await _spotify.PlayAsync(song.SpotifyUri);
-        await _ble.SendCommandAsync($"uri:{song.SpotifyUri}");
         await Shell.Current.GoToAsync("//PlayerPage");
     }
 }

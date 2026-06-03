@@ -11,6 +11,10 @@ public partial class PlayerViewModel : ObservableObject
     private readonly IBleService _ble;
     private readonly ISpotifyService _spotify;
 
+    // Tracks what was last sent to peers, so we only broadcast actual changes.
+    private string? _lastBroadcastUri;
+    private bool _lastBroadcastIsPlaying;
+
     [ObservableProperty]
     private Song? _currentSong;
 
@@ -39,17 +43,44 @@ public partial class PlayerViewModel : ObservableObject
         _ble = ble;
         _spotify = spotify;
 
+        // The host mirrors its own Spotify playback to peers. Broadcasting from the
+        // state stream (rather than from each command) guarantees we always send the
+        // track that is actually playing — no UI-thread timing races.
         _spotify.PlaybackStateChanged.Subscribe(state =>
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 CurrentSong = state.CurrentSong;
                 IsPlaying = state.IsPlaying;
                 PositionMs = state.PositionMs;
+                _ = BroadcastStateAsync(state);
             }));
 
         // Each join signal increments the listener count
         _ble.PeerJoined.Subscribe(_ =>
             MainThread.BeginInvokeOnMainThread(() => ListenerCount++));
+    }
+
+    // Sends a BLE command to peers only when the song or play/pause state actually changes.
+    private async Task BroadcastStateAsync(PlaybackState state)
+    {
+        try
+        {
+            if (state.CurrentSong is { } song && song.SpotifyUri != _lastBroadcastUri)
+            {
+                _lastBroadcastUri = song.SpotifyUri;
+                _lastBroadcastIsPlaying = state.IsPlaying;
+                await _ble.SendCommandAsync($"uri:{song.SpotifyUri}");
+            }
+            else if (state.IsPlaying != _lastBroadcastIsPlaying)
+            {
+                _lastBroadcastIsPlaying = state.IsPlaying;
+                await _ble.SendCommandAsync(state.IsPlaying ? "play" : "pause");
+            }
+        }
+        catch
+        {
+            // A failed BLE send shouldn't crash the host UI; peers resync on the next change.
+        }
     }
 
     // Recompute derived properties whenever their inputs change
@@ -58,36 +89,16 @@ public partial class PlayerViewModel : ObservableObject
     partial void OnIsPlayingChanged(bool value) => OnPropertyChanged(nameof(PlayPauseGlyph));
     partial void OnListenerCountChanged(int value) => OnPropertyChanged(nameof(ListenerLabel));
 
+    // Commands just drive Spotify; the resulting state change is what gets broadcast
+    // to peers (see BroadcastStateAsync), so the peer always mirrors the real track.
     [RelayCommand]
-    private async Task PlayPause()
-    {
-        if (IsPlaying)
-        {
-            await _spotify.PauseAsync();
-            await _ble.SendCommandAsync("pause");
-        }
-        else
-        {
-            await _spotify.ResumeAsync();
-            await _ble.SendCommandAsync("play");
-        }
-    }
+    private Task PlayPause() => IsPlaying ? _spotify.PauseAsync() : _spotify.ResumeAsync();
 
     [RelayCommand]
-    private async Task SkipPrevious()
-    {
-        await _spotify.SkipPreviousAsync();
-        if (CurrentSong is not null)
-            await _ble.SendCommandAsync($"uri:{CurrentSong.SpotifyUri}");
-    }
+    private Task SkipPrevious() => _spotify.SkipPreviousAsync();
 
     [RelayCommand]
-    private async Task SkipNext()
-    {
-        await _spotify.SkipNextAsync();
-        if (CurrentSong is not null)
-            await _ble.SendCommandAsync($"uri:{CurrentSong.SpotifyUri}");
-    }
+    private Task SkipNext() => _spotify.SkipNextAsync();
 
     [RelayCommand]
     private async Task EndSession()
