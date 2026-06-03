@@ -31,7 +31,7 @@
 		<ApplicationTitle>Wide Play</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.somekaicodes.wideplay</ApplicationId>
+		<ApplicationId>com.kaikim.wideplay</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

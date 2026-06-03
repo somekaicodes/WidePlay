@@ -85,7 +85,7 @@ iOS requires code signing, even for personal sideloading. A **free** Apple ID wo
 
 1. Open the project's signing in **Xcode** (or VS Code's MAUI signing UI):
    - Sign in with your Apple ID under **Accounts**.
-   - Set the **Team** to your personal team and confirm the **Bundle Identifier** `com.somekaicodes.wideplay` (change it if it collides).
+   - Set the **Team** to your personal team and confirm the **Bundle Identifier** `com.kaikim.wideplay` (change it if it collides).
    - Let Xcode create a provisioning profile automatically.
 2. Connect the iPhone by USB and **trust** the computer.
 3. Build and deploy:
