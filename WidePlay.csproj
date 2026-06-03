@@ -71,6 +71,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="Shiny.BluetoothLE" Version="3.3.3" />
 		<PackageReference Include="Shiny.BluetoothLE.Hosting" Version="3.3.3" />
+		<PackageReference Include="Shiny.Hosting.Maui" Version="3.3.3" />
 		<PackageReference Include="SpotifyAPI.Web" Version="7.4.2" />
 		<PackageReference Include="System.Reactive" Version="6.1.0" />
 	</ItemGroup>

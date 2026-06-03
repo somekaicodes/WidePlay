@@ -13,6 +13,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseShiny() // registers Shiny's platform host (required for BLE) — provides Shiny.AndroidPlatform etc.
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -46,11 +47,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PeerViewModel>();
 		builder.Services.AddSingleton<SearchViewModel>();
 
-		// Pages — resolved by DI so their ViewModels are injected via constructor
-		builder.Services.AddSingleton<HomePage>();
-		builder.Services.AddSingleton<PlayerPage>();
-		builder.Services.AddSingleton<PeerPage>();
-		builder.Services.AddSingleton<SearchPage>();
+		// Pages — Transient: MAUI Shell creates each page against a per-navigation scoped
+		// provider, so a singleton page would outlive (and then access) a disposed scope.
+		// The ViewModels stay singletons above, so session state still persists across navigation.
+		builder.Services.AddTransient<HomePage>();
+		builder.Services.AddTransient<PlayerPage>();
+		builder.Services.AddTransient<PeerPage>();
+		builder.Services.AddTransient<SearchPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

@@ -103,8 +103,12 @@ public class BleService : IBleService
 
     // ---------------- PEER ----------------
 
-    public Task StartScanningAsync()
+    public async Task StartScanningAsync()
     {
+        // Prompts for runtime BLE/location permission. Required before scanning,
+        // especially on Android < 12 where scanning needs ACCESS_FINE_LOCATION.
+        await _central.RequestAccessAsync();
+
         _discovered.Clear();
         _scanSub = _central
             .Scan(new ScanConfig { ServiceUuids = [ServiceUuid] })
@@ -122,8 +126,6 @@ public class BleService : IBleService
                     IsConnected = false,
                 });
             });
-
-        return Task.CompletedTask;
     }
 
     public async Task SendJoinSignalAsync(PeerDevice host, string deviceName)
