@@ -28,6 +28,11 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<!-- Bluetooth usage description — required for BLE; the app is rejected/crashes without it -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Wide Play uses Bluetooth to discover nearby sessions and sync playback between phones.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Wide Play uses Bluetooth to broadcast your session so nearby phones can play along.</string>
 	<!-- Custom URL scheme so Spotify's OAuth redirect (wideplay://callback) returns to the app -->
 	<key>CFBundleURLTypes</key>
 	<array>

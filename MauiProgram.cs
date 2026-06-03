@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shiny;
 using WidePlay.Services;
 using WidePlay.ViewModels;
 using WidePlay.Views;
@@ -18,12 +19,21 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		// Services — singletons so BLE and Spotify state persists for the app lifetime.
-		// Flip to false once you've added your Spotify Client ID in SpotifyConfig.cs
-		// (and have a Premium account) to use the real Spotify integration.
-		bool useMockSpotify = true;
+		// Shiny BLE — central (scanning/connecting) + hosting (advertising/GATT server) roles.
+		builder.Services.AddBluetoothLE();
+		builder.Services.AddBluetoothLeHosting();
 
-		builder.Services.AddSingleton<IBleService, MockBleService>();
+		// Services — singletons so BLE and Spotify state persists for the app lifetime.
+		// Flip these to false to use the real integrations:
+		//   * useMockSpotify — set false after adding your Client ID in SpotifyConfig.cs (needs Premium)
+		//   * useMockBle     — set false to use real BLE (needs two physical devices to test)
+		bool useMockSpotify = true;
+		bool useMockBle = true;
+
+		if (useMockBle)
+			builder.Services.AddSingleton<IBleService, MockBleService>();
+		else
+			builder.Services.AddSingleton<IBleService, BleService>();
 
 		if (useMockSpotify)
 			builder.Services.AddSingleton<ISpotifyService, MockSpotifyService>();
