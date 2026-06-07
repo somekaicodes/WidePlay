@@ -165,10 +165,10 @@ public class SpotifyService : ISpotifyService
         catch (APIException ex) when (ex.Message.Contains("No active device"))
         {
             await MainThread.InvokeOnMainThreadAsync(() =>
-                Application.Current?.MainPage?.DisplayAlert(
+                Application.Current?.Windows[0].Page?.DisplayAlertAsync(
                     "Open Spotify",
                     "Please open the Spotify app and play or pause a track first, then try again.",
-                    "OK"));
+                    "OK") ?? Task.CompletedTask);
         }
         catch
         {

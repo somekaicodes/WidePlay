@@ -55,9 +55,19 @@ public partial class PlayerViewModel : ObservableObject
                 _ = BroadcastStateAsync(state);
             }));
 
-        // Each join signal increments the listener count
+        // When a peer joins, increment the count and immediately send the current song
+        // so they don't sit on "Waiting for host..." if a track is already playing.
         _ble.PeerJoined.Subscribe(_ =>
-            MainThread.BeginInvokeOnMainThread(() => ListenerCount++));
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                ListenerCount++;
+                if (CurrentSong is { } song)
+                {
+                    // Brief delay lets the peer's GATT subscription register before we notify.
+                    await Task.Delay(600);
+                    await _ble.SendCommandAsync($"uri:{song.SpotifyUri}");
+                }
+            }));
     }
 
     // Sends a BLE command to peers only when the song or play/pause state actually changes.

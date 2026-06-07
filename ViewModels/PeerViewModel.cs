@@ -49,15 +49,31 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
     private async Task HandleCommandAsync(string command)
     {
         if (command == "play")
+        {
+            IsPlaying = true;
             await _spotify.ResumeAsync();
+        }
         else if (command == "pause")
+        {
+            IsPlaying = false;
             await _spotify.PauseAsync();
+        }
         else if (command == "skip")
             await _spotify.SkipNextAsync();
         else if (command == "stop")
             await LeaveSession();
         else if (command.StartsWith("uri:"))
-            await _spotify.PlayAsync(command["uri:".Length..]);
+        {
+            var uri = command["uri:".Length..];
+            IsPlaying = true;
+
+            // Update the Now Playing UI immediately from the BLE command —
+            // don't wait for Spotify's API response, which may be slow or fail.
+            // The song title/artist will fill in once PlaybackStateChanged fires.
+            CurrentSong ??= new Song { SpotifyUri = uri, Title = "Loading…" };
+
+            await _spotify.PlayAsync(uri);
+        }
     }
 
     [RelayCommand]
