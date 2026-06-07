@@ -109,12 +109,44 @@ public class SpotifyService : ISpotifyService
         if (_client is null) return;
         await SafePlayerCall(async () =>
         {
-            await _client.Player.ResumePlayback(new PlayerResumePlaybackRequest { Uris = [spotifyUri] });
+            var deviceId = await EnsureActiveDeviceAsync();
+            var request = new PlayerResumePlaybackRequest { Uris = [spotifyUri] };
+            if (deviceId is not null)
+                request.DeviceId = deviceId;
+
+            await _client.Player.ResumePlayback(request);
             // Give Spotify's API a moment to reflect the new track before polling.
-            // Without this delay GetCurrentPlayback often returns the previous track or null.
             await Task.Delay(1500);
             await RefreshPlaybackStateAsync();
         });
+    }
+
+    // Returns the device ID of an active (or newly activated) Spotify device on this phone.
+    // If Spotify is open but idle, TransferPlayback wakes it up — no manual play/pause needed.
+    private async Task<string?> EnsureActiveDeviceAsync()
+    {
+        if (_client is null) return null;
+        try
+        {
+            var devices = await _client.Player.GetAvailableDevices();
+            var active = devices.Devices.FirstOrDefault(d => d.IsActive);
+            if (active is not null) return active.Id;
+
+            // No active device — transfer playback to the first available one (wakes Spotify up)
+            var available = devices.Devices.FirstOrDefault();
+            if (available?.Id is { } id)
+            {
+                await _client.Player.TransferPlayback(new PlayerTransferPlaybackRequest([id]) { Play = false });
+                await Task.Delay(800); // give Spotify a moment to accept the transfer
+                return id;
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public async Task PauseAsync()
