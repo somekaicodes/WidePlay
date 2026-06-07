@@ -76,4 +76,15 @@
 		<PackageReference Include="System.Reactive" Version="6.1.0" />
 	</ItemGroup>
 
+	<!-- Strip macOS extended attributes right before AND after the bundle is assembled,
+	     since the asset catalog compiler can re-add com.apple.FinderInfo during _CodesignAppBundle.
+	     Without this, codesign fails with "resource fork...detritus not allowed". -->
+	<Target Name="StripDisallowedXattrs" BeforeTargets="_CodesignAppBundle">
+		<Exec Command="xattr -rc &quot;$(AppBundleDir)&quot;" ContinueOnError="true" />
+		<Exec Command="xattr -d com.apple.FinderInfo &quot;$(AppBundleDir)&quot;" ContinueOnError="true" />
+	</Target>
+	<Target Name="StripDisallowedXattrsInner" AfterTargets="ComputeCodesignItems" BeforeTargets="_CodesignAppBundle">
+		<Exec Command="xattr -rc &quot;$(AppBundleDir)&quot;" ContinueOnError="true" />
+	</Target>
+
 </Project>

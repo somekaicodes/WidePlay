@@ -107,36 +107,73 @@ public class SpotifyService : ISpotifyService
     public async Task PlayAsync(string spotifyUri)
     {
         if (_client is null) return;
-        await _client.Player.ResumePlayback(new PlayerResumePlaybackRequest { Uris = [spotifyUri] });
-        await RefreshPlaybackStateAsync();
+        await SafePlayerCall(async () =>
+        {
+            await _client.Player.ResumePlayback(new PlayerResumePlaybackRequest { Uris = [spotifyUri] });
+            await RefreshPlaybackStateAsync();
+        });
     }
 
     public async Task PauseAsync()
     {
         if (_client is null) return;
-        await _client.Player.PausePlayback();
-        await RefreshPlaybackStateAsync();
+        await SafePlayerCall(async () =>
+        {
+            await _client.Player.PausePlayback();
+            await RefreshPlaybackStateAsync();
+        });
     }
 
     public async Task ResumeAsync()
     {
         if (_client is null) return;
-        await _client.Player.ResumePlayback();
-        await RefreshPlaybackStateAsync();
+        await SafePlayerCall(async () =>
+        {
+            await _client.Player.ResumePlayback();
+            await RefreshPlaybackStateAsync();
+        });
     }
 
     public async Task SkipPreviousAsync()
     {
         if (_client is null) return;
-        await _client.Player.SkipPrevious();
-        await RefreshPlaybackStateAsync();
+        await SafePlayerCall(async () =>
+        {
+            await _client.Player.SkipPrevious();
+            await RefreshPlaybackStateAsync();
+        });
     }
 
     public async Task SkipNextAsync()
     {
         if (_client is null) return;
-        await _client.Player.SkipNext();
-        await RefreshPlaybackStateAsync();
+        await SafePlayerCall(async () =>
+        {
+            await _client.Player.SkipNext();
+            await RefreshPlaybackStateAsync();
+        });
+    }
+
+    // Wraps Spotify player calls so an "No active device" error shows a friendly alert
+    // rather than crashing the app. The Spotify app must be open and active on the device.
+    private static async Task SafePlayerCall(Func<Task> call)
+    {
+        try
+        {
+            await call();
+        }
+        catch (APIException ex) when (ex.Message.Contains("No active device"))
+        {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+                Application.Current?.MainPage?.DisplayAlert(
+                    "Open Spotify",
+                    "Please open the Spotify app and play or pause a track first, then try again.",
+                    "OK"));
+        }
+        catch
+        {
+            // Swallow other transient API errors (rate limits, network blips) silently.
+        }
     }
 
     public async Task RefreshPlaybackStateAsync()
