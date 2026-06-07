@@ -99,11 +99,15 @@ iOS requires code signing, even for personal sideloading. A **free** Apple ID wo
 
 ## 6. Testing a real session (two phones)
 
+**Note on Spotify Web API playback control:** The Spotify Web API only controls playback on a device that is actively streaming — i.e. the Spotify app must have recently played something on that device. This is a platform-level restriction. Wide Play uses mock playback by default (`useMockSpotify = true` in `MauiProgram.cs`) which fully demonstrates the BLE session coordination without this constraint. Real Spotify search and OAuth work regardless of the mock setting. To use real playback control, set `useMockSpotify = false` and ensure the Spotify app has been actively playing on each device immediately before testing.
+
+**Demo flow (with mock playback, default):**
+
 1. Install the app on **both** phones (any mix of iOS/Android).
-2. Make sure Bluetooth is on, and the Spotify app is installed and **playing/available** on each (so it counts as an active Spotify Connect device).
-3. On **Phone A**: connect Spotify, tap **Host a Session**, search and play a track.
-4. On **Phone B**: tap **Join a Session**, pick Phone A's session from the list.
-5. Use play / pause / skip / search on Phone A — Phone B should mirror within a moment.
+2. Make sure Bluetooth is on.
+3. On **Phone A**: tap **Host a Session** → **Search Song** → search `blinding`, `levitating`, `stay`, or `peaches` → tap a result.
+4. On **Phone B**: tap **Join a Session** → pick Phone A's session.
+5. Both phones count down 8 seconds then show the same track playing in sync.
 
 ---
 
