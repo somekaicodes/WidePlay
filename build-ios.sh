@@ -12,8 +12,8 @@ PROFILE="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/98cfbf14-4
 DEVICE="00008120-000C14602188C01E"
 ENTITLEMENTS="/tmp/wideplay_entitlements.plist"
 
-echo "→ Building (codesign step will fail — that's expected)..."
-dotnet build WidePlay.csproj -f net10.0-ios -c Debug -p:RuntimeIdentifier=ios-arm64 2>/dev/null || true
+echo "→ Building (codesign step will fail at the end — that's expected)..."
+dotnet build WidePlay.csproj -f net10.0-ios -c Debug -p:RuntimeIdentifier=ios-arm64 2>/dev/null; true
 
 echo "→ Stripping xattrs..."
 xattr -rc "$APP"
