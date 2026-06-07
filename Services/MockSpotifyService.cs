@@ -14,10 +14,10 @@ public class MockSpotifyService : ISpotifyService
 
     private static readonly List<Song> FakeCatalog =
     [
-        new Song { Id = "1", Title = "Blinding Lights",  Artist = "The Weeknd",    AlbumArtUrl = "https://picsum.photos/seed/blinding/300/300",  SpotifyUri = "spotify:track:0VjIjW4GlUZAMYd2vXMi3b", DurationMs = 200040 },
-        new Song { Id = "2", Title = "Levitating",       Artist = "Dua Lipa",      AlbumArtUrl = "https://picsum.photos/seed/levitating/300/300", SpotifyUri = "spotify:track:463CkQjx2Zk1yXoBuierM9", DurationMs = 203064 },
-        new Song { Id = "3", Title = "Stay",             Artist = "The Kid LAROI", AlbumArtUrl = "https://picsum.photos/seed/staylaroi/300/300",  SpotifyUri = "spotify:track:5HCyWlXZPP0y6Gqq8TgA20", DurationMs = 141005 },
-        new Song { Id = "4", Title = "Peaches",          Artist = "Justin Bieber", AlbumArtUrl = "https://picsum.photos/seed/peaches/300/300",   SpotifyUri = "spotify:track:4iJyoBOLtHqaWYs3vyWVsk", DurationMs = 198082 },
+        new Song { Id = "1", Title = "Blinding Lights",  Artist = "The Weeknd",    AlbumArtUrl = "blinding_lights.png", SpotifyUri = "spotify:track:0VjIjW4GlUZAMYd2vXMi3b", DurationMs = 200040 },
+        new Song { Id = "2", Title = "Levitating",       Artist = "Dua Lipa",      AlbumArtUrl = "levitating.png",      SpotifyUri = "spotify:track:463CkQjx2Zk1yXoBuierM9", DurationMs = 203064 },
+        new Song { Id = "3", Title = "Stay",             Artist = "The Kid LAROI", AlbumArtUrl = "stay.png",            SpotifyUri = "spotify:track:5HCyWlXZPP0y6Gqq8TgA20", DurationMs = 141005 },
+        new Song { Id = "4", Title = "Peaches",          Artist = "Justin Bieber", AlbumArtUrl = "peaches.png",         SpotifyUri = "spotify:track:4iJyoBOLtHqaWYs3vyWVsk", DurationMs = 198082 },
     ];
 
     public async Task<bool> AuthenticateAsync()
