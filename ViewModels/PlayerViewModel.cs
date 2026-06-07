@@ -19,6 +19,28 @@ public partial class PlayerViewModel : ObservableObject
     // the uri when the host's Spotify starts playing during the countdown.
     public bool ScheduledPlayPending { get; set; }
 
+    // Called by SearchViewModel so the host sees the song title during the countdown.
+    public void SetPendingSong(Song song, int countdownSeconds)
+    {
+        CurrentSong = new Song
+        {
+            Id = song.Id,
+            Title = $"{song.Title} — starting in {countdownSeconds}s",
+            Artist = song.Artist,
+            AlbumArtUrl = song.AlbumArtUrl,
+            DurationMs = song.DurationMs,
+            SpotifyUri = song.SpotifyUri,
+        };
+        IsPlaying = false;
+    }
+
+    // Called once the scheduled play actually starts.
+    public void ClearPendingSong()
+    {
+        ScheduledPlayPending = false;
+        // Real song title arrives via PlaybackStateChanged; don't reset CurrentSong here.
+    }
+
     [ObservableProperty]
     private Song? _currentSong;
 

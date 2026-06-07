@@ -9,9 +9,9 @@ namespace WidePlay.ViewModels;
 // Drives the Song Search screen — host searches Spotify and picks a track to play.
 public partial class SearchViewModel : ObservableObject
 {
-    // How many seconds ahead both phones schedule the start.
-    // 30s gives BLE propagation + Spotify time to buffer on both devices.
-    private const int SyncCountdownSeconds = 30;
+    // Countdown in seconds. Short enough to keep BLE connections alive and Spotify active,
+    // long enough for the startat: command to reach all peers before playback starts.
+    private const int SyncCountdownSeconds = 8;
 
     private readonly ISpotifyService _spotify;
     private readonly IBleService _ble;
@@ -55,20 +55,26 @@ public partial class SearchViewModel : ObservableObject
         var startAt = DateTimeOffset.UtcNow.AddSeconds(SyncCountdownSeconds);
         var timestampMs = startAt.ToUnixTimeMilliseconds();
 
-        // Suppress auto-broadcast from PlayerViewModel during the countdown
+        // Suppress auto-broadcast during the countdown so startat: isn't overridden
         _player.ScheduledPlayPending = true;
 
-        // Tell all peers when to start
+        // Show the song immediately on the host screen during the countdown
+        _player.SetPendingSong(song, SyncCountdownSeconds);
+
+        // Tell all peers when to start (absolute UTC timestamp)
         await _ble.SendCommandAsync($"startat:{song.SpotifyUri}:{timestampMs}");
 
         await Shell.Current.GoToAsync("//PlayerPage");
 
-        // Host waits the same countdown then plays
+        // Pre-activate Spotify now so it's ready exactly when the countdown ends
+        await _spotify.WarmUpAsync();
+
+        // Wait out the remainder of the countdown
         var delay = startAt - DateTimeOffset.UtcNow;
         if (delay > TimeSpan.Zero)
             await Task.Delay(delay);
 
-        _player.ScheduledPlayPending = false;
+        _player.ClearPendingSong();
         await _spotify.PlayAsync(song.SpotifyUri);
     }
 }

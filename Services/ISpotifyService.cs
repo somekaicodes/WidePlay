@@ -29,4 +29,9 @@ public interface ISpotifyService
 
     // Poll current playback state from Spotify Web API and push to PlaybackStateChanged
     Task RefreshPlaybackStateAsync();
+
+    // Proactively activate the Spotify device so it's ready before playback is requested.
+    // Call this when the user becomes host or peer, not just when they try to play.
+    // Returns false if no Spotify device is available (app not open).
+    Task<bool> WarmUpAsync();
 }

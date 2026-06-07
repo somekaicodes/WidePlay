@@ -81,4 +81,6 @@ public class MockSpotifyService : ISpotifyService
         await Task.Delay(100);
         _playbackStateChanged.OnNext(_state);
     }
+
+    public Task<bool> WarmUpAsync() => Task.FromResult(true);
 }

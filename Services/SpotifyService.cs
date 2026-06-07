@@ -211,6 +211,12 @@ public class SpotifyService : ISpotifyService
         }
     }
 
+    public async Task<bool> WarmUpAsync()
+    {
+        var deviceId = await EnsureActiveDeviceAsync();
+        return deviceId is not null;
+    }
+
     public async Task RefreshPlaybackStateAsync()
     {
         if (_client is null) return;

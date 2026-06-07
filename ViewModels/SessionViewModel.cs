@@ -50,6 +50,17 @@ public partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task HostSession()
     {
+        // Pre-activate Spotify before any song is selected so the device is ready instantly.
+        var ready = await _spotify.WarmUpAsync();
+        if (!ready)
+        {
+            await Shell.Current.DisplayAlertAsync(
+                "Open Spotify",
+                "Please open the Spotify app on this device before hosting a session.",
+                "OK");
+            return;
+        }
+
         await _ble.StartHostingAsync(DeviceInfo.Current.Name);
         await Shell.Current.GoToAsync("//PlayerPage");
     }
@@ -58,6 +69,9 @@ public partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task JoinSession(PeerDevice host)
     {
+        // Pre-activate Spotify on the peer device too
+        await _spotify.WarmUpAsync();
+
         await _ble.SendJoinSignalAsync(host, DeviceInfo.Current.Name);
         await Shell.Current.GoToAsync($"//PeerPage?hostName={Uri.EscapeDataString(host.Name)}");
     }
