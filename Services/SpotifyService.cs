@@ -110,6 +110,9 @@ public class SpotifyService : ISpotifyService
         await SafePlayerCall(async () =>
         {
             await _client.Player.ResumePlayback(new PlayerResumePlaybackRequest { Uris = [spotifyUri] });
+            // Give Spotify's API a moment to reflect the new track before polling.
+            // Without this delay GetCurrentPlayback often returns the previous track or null.
+            await Task.Delay(1500);
             await RefreshPlaybackStateAsync();
         });
     }

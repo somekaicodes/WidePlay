@@ -44,6 +44,11 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
     {
         if (query.TryGetValue("hostName", out var name))
             HostName = Uri.UnescapeDataString(name?.ToString() ?? string.Empty);
+
+        // Reset playback state for each new session (ViewModel is a singleton so
+        // stale state from a previous session would otherwise linger).
+        CurrentSong = null;
+        IsPlaying = false;
     }
 
     private async Task HandleCommandAsync(string command)
@@ -63,17 +68,45 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
         else if (command == "stop")
             await LeaveSession();
         else if (command.StartsWith("uri:"))
-        {
-            var uri = command["uri:".Length..];
-            IsPlaying = true;
+            await PlayFromUri(command["uri:".Length..]);
+        else if (command.StartsWith("startat:"))
+            await HandleScheduledPlay(command);
+    }
 
-            // Update the Now Playing UI immediately from the BLE command —
-            // don't wait for Spotify's API response, which may be slow or fail.
-            // The song title/artist will fill in once PlaybackStateChanged fires.
-            CurrentSong ??= new Song { SpotifyUri = uri, Title = "Loading…" };
+    private async Task PlayFromUri(string uri)
+    {
+        IsPlaying = true;
+        // Show a placeholder immediately; real title arrives via PlaybackStateChanged.
+        CurrentSong = new Song { SpotifyUri = uri, Title = "Loading…" };
+        await _spotify.PlayAsync(uri);
+    }
 
-            await _spotify.PlayAsync(uri);
-        }
+    // "startat:{spotifyUri}:{unixTimestampMs}" — both phones wait until the same
+    // moment then start playing, achieving near-perfect sync without a live clock signal.
+    private async Task HandleScheduledPlay(string command)
+    {
+        var parts = command.Split(':', 3); // ["startat", "spotify", "track:xxx:timestamp"]
+        // command format: "startat:{spotifyUri}:{timestampMs}"
+        // spotifyUri itself contains colons so we split from the right
+        var lastColon = command.LastIndexOf(':');
+        if (lastColon < 0) return;
+
+        var timestampStr = command[(lastColon + 1)..];
+        var spotifyUri = command["startat:".Length..lastColon];
+
+        if (!long.TryParse(timestampStr, out var timestampMs)) return;
+
+        var startAt = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs);
+        var delay = startAt - DateTimeOffset.UtcNow;
+
+        // Show countdown immediately so the listener knows when music starts.
+        CurrentSong = new Song { SpotifyUri = spotifyUri, Title = $"Starting in {(int)delay.TotalSeconds}s…" };
+        IsPlaying = false;
+
+        if (delay > TimeSpan.Zero)
+            await Task.Delay(delay);
+
+        await PlayFromUri(spotifyUri);
     }
 
     [RelayCommand]

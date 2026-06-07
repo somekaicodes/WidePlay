@@ -11,9 +11,13 @@ public partial class PlayerViewModel : ObservableObject
     private readonly IBleService _ble;
     private readonly ISpotifyService _spotify;
 
-    // Tracks what was last sent to peers, so we only broadcast actual changes.
+    // Tracks what was last sent to peers so we only broadcast actual changes.
     private string? _lastBroadcastUri;
     private bool _lastBroadcastIsPlaying;
+
+    // Set to true while a scheduled "startat" is pending so we don't double-broadcast
+    // the uri when the host's Spotify starts playing during the countdown.
+    public bool ScheduledPlayPending { get; set; }
 
     [ObservableProperty]
     private Song? _currentSong;
@@ -71,8 +75,11 @@ public partial class PlayerViewModel : ObservableObject
     }
 
     // Sends a BLE command to peers only when the song or play/pause state actually changes.
+    // Suppressed during a scheduled play so the startat: command isn't overridden.
     private async Task BroadcastStateAsync(PlaybackState state)
     {
+        if (ScheduledPlayPending) return;
+
         try
         {
             if (state.CurrentSong is { } song && song.SpotifyUri != _lastBroadcastUri)
