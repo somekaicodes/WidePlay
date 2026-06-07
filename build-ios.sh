@@ -15,6 +15,9 @@ ENTITLEMENTS="/tmp/wideplay_entitlements.plist"
 echo "→ Building (codesign step will fail at the end — that's expected)..."
 dotnet build WidePlay.csproj -f net10.0-ios -c Debug -p:RuntimeIdentifier=ios-arm64 2>/dev/null; true
 
+echo "→ Removing any existing signature (avoids codesign re-adding xattrs during --force replace)..."
+/usr/bin/codesign --remove-signature "$APP" 2>/dev/null; true
+
 echo "→ Stripping xattrs..."
 xattr -rc "$APP"
 
@@ -26,7 +29,7 @@ security cms -D -i "$PROFILE" > /tmp/wideplay_profile.plist 2>/dev/null
 /usr/libexec/PlistBuddy -x -c "Print :Entitlements" /tmp/wideplay_profile.plist > "$ENTITLEMENTS"
 
 echo "→ Signing..."
-/usr/bin/codesign --force --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$APP"
+/usr/bin/codesign --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$APP"
 
 echo "→ Installing on device..."
 xcrun devicectl device install app --device "$DEVICE" "$APP"
