@@ -28,7 +28,7 @@ public static class MauiProgram
 		// Flip these to false to use the real integrations:
 		//   * useMockSpotify — set false after adding your Client ID in SpotifyConfig.cs (needs Premium)
 		//   * useMockBle     — set false to use real BLE (needs two physical devices to test)
-		bool useMockSpotify = true;
+		bool useMockSpotify = false;
 		bool useMockBle = false;
 
 		if (useMockBle)

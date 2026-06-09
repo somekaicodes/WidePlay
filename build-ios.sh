@@ -31,7 +31,7 @@ security cms -D -i "$PROFILE" > /tmp/wideplay_profile.plist 2>/dev/null
 /usr/libexec/PlistBuddy -x -c "Print :Entitlements" /tmp/wideplay_profile.plist > "$ENTITLEMENTS"
 
 echo "→ Signing..."
-/usr/bin/codesign --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$TMP_APP"
+/usr/bin/codesign --force --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$TMP_APP"
 
 echo "→ Installing on device..."
 xcrun devicectl device install app --device "$DEVICE" "$TMP_APP"

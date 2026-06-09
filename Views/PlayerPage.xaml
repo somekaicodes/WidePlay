@@ -13,15 +13,15 @@
         <Border Grid.Row="1" WidthRequest="260" HeightRequest="260"
                 HorizontalOptions="Center" StrokeThickness="0"
                 StrokeShape="RoundRectangle 18" BackgroundColor="#1E1E1E">
-            <Image Source="{Binding CurrentSong.AlbumArtUrl}" Aspect="AspectFill" />
+            <Image Source="{Binding AlbumArt}" Aspect="AspectFill" />
         </Border>
 
         <!-- Song info -->
         <VerticalStackLayout Grid.Row="2" Spacing="4" Margin="0,16,0,0">
-            <Label Text="{Binding CurrentSong.Title, FallbackValue='Nothing playing'}"
+            <Label Text="{Binding SongTitle}"
                    FontSize="24" FontAttributes="Bold" TextColor="White"
                    HorizontalOptions="Center" HorizontalTextAlignment="Center" />
-            <Label Text="{Binding CurrentSong.Artist}" FontSize="16"
+            <Label Text="{Binding SongArtist}" FontSize="16"
                    TextColor="#919191" HorizontalOptions="Center" />
         </VerticalStackLayout>
 

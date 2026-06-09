@@ -58,6 +58,23 @@ public partial class PlayerViewModel : ObservableObject
         ? (double)PositionMs / CurrentSong.DurationMs
         : 0;
 
+    // Flat properties for song info — avoids MAUI's chained-binding refresh bug.
+    public string SongTitle  => CurrentSong?.Title  ?? "Nothing playing";
+    public string SongArtist => CurrentSong?.Artist ?? string.Empty;
+
+    // StreamImageSource instead of FileImageSource: MAUI cannot cache stream sources by
+    // filename, so the Image control always fetches fresh bytes when the song changes.
+    private ImageSource? _albumArt;
+    public ImageSource? AlbumArt
+    {
+        get => _albumArt;
+        private set { _albumArt = value; OnPropertyChanged(); }
+    }
+
+    private static ImageSource? AlbumArtFrom(string? url) =>
+        string.IsNullOrEmpty(url) ? null :
+        ImageSource.FromStream(ct => FileSystem.OpenAppPackageFileAsync(url));
+
     // Glyph shown on the play/pause button, driven by IsPlaying
     public string PlayPauseGlyph => IsPlaying ? "⏸" : "▶";
 
@@ -94,6 +111,18 @@ public partial class PlayerViewModel : ObservableObject
                     await _ble.SendCommandAsync($"uri:{song.SpotifyUri}");
                 }
             }));
+
+        // Periodic heartbeat every 8 seconds: resends the current song URI to all peers.
+        // Keeps the BLE GATT connection alive and re-syncs any peer that missed a command.
+        _ = Task.Run(async () =>
+        {
+            while (true)
+            {
+                await Task.Delay(8000);
+                if (CurrentSong is { SpotifyUri: var uri } && !ScheduledPlayPending)
+                    await _ble.SendCommandAsync($"uri:{uri}");
+            }
+        });
     }
 
     // Sends a BLE command to peers only when the song or play/pause state actually changes.
@@ -124,7 +153,13 @@ public partial class PlayerViewModel : ObservableObject
 
     // Recompute derived properties whenever their inputs change
     partial void OnPositionMsChanged(int value) => OnPropertyChanged(nameof(ProgressValue));
-    partial void OnCurrentSongChanged(Song? value) => OnPropertyChanged(nameof(ProgressValue));
+    partial void OnCurrentSongChanged(Song? value)
+    {
+        OnPropertyChanged(nameof(ProgressValue));
+        OnPropertyChanged(nameof(SongTitle));
+        OnPropertyChanged(nameof(SongArtist));
+        AlbumArt = AlbumArtFrom(value?.AlbumArtUrl);
+    }
     partial void OnIsPlayingChanged(bool value) => OnPropertyChanged(nameof(PlayPauseGlyph));
     partial void OnListenerCountChanged(int value) => OnPropertyChanged(nameof(ListenerLabel));
 

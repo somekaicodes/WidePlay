@@ -21,7 +21,7 @@
         <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center">
             <Border WidthRequest="260" HeightRequest="260" HorizontalOptions="Center"
                     StrokeThickness="0" StrokeShape="RoundRectangle 18" BackgroundColor="#1E1E1E">
-                <Image Source="{Binding CurrentSong.AlbumArtUrl}" Aspect="AspectFill" />
+                <Image Source="{Binding AlbumArt}" Aspect="AspectFill" />
             </Border>
             <VerticalStackLayout Spacing="4">
                 <Label Text="{Binding CurrentSong.Title, FallbackValue='Waiting for host…'}"

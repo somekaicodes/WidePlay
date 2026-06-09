@@ -21,6 +21,22 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
     [ObservableProperty]
     private string _hostName = string.Empty;
 
+    // Flat properties to avoid MAUI's chained-binding refresh bug.
+    public string SongTitle  => CurrentSong?.Title  ?? "Waiting for host…";
+    public string SongArtist => CurrentSong?.Artist ?? string.Empty;
+
+    // StreamImageSource — bypasses MAUI's filename-based FileImageSource cache on both platforms.
+    private ImageSource? _albumArt;
+    public ImageSource? AlbumArt
+    {
+        get => _albumArt;
+        private set { _albumArt = value; OnPropertyChanged(); }
+    }
+
+    private static ImageSource? AlbumArtFrom(string? url) =>
+        string.IsNullOrEmpty(url) ? null :
+        ImageSource.FromStream(ct => FileSystem.OpenAppPackageFileAsync(url));
+
     public PeerViewModel(IBleService ble, ISpotifyService spotify)
     {
         _ble = ble;
@@ -34,7 +50,7 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
         _spotify.PlaybackStateChanged.Subscribe(state =>
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                CurrentSong = state.CurrentSong;
+                CurrentSong = state.CurrentSong;   // triggers OnCurrentSongChanged
                 IsPlaying = state.IsPlaying;
             }));
     }
@@ -76,8 +92,7 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
     private async Task PlayFromUri(string uri)
     {
         IsPlaying = true;
-        // Show a placeholder immediately; real title arrives via PlaybackStateChanged.
-        CurrentSong = new Song { SpotifyUri = uri, Title = "Loading…" };
+        CurrentSong = new Song { SpotifyUri = uri, Title = "Loading…" };  // triggers OnCurrentSongChanged
         await _spotify.PlayAsync(uri);
     }
 
@@ -107,6 +122,13 @@ public partial class PeerViewModel : ObservableObject, IQueryAttributable
             await Task.Delay(delay);
 
         await PlayFromUri(spotifyUri);
+    }
+
+    partial void OnCurrentSongChanged(Song? value)
+    {
+        OnPropertyChanged(nameof(SongTitle));
+        OnPropertyChanged(nameof(SongArtist));
+        AlbumArt = AlbumArtFrom(value?.AlbumArtUrl);
     }
 
     [RelayCommand]

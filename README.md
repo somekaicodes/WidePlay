@@ -1,8 +1,10 @@
 # Wide Play
 
-> Turn a room full of phones into one synchronized speaker. One phone DJs; every other phone plays the same Spotify track at the same time — coordinated over Bluetooth Low Energy.
+<p align="center">
+  <img src="screenshots/appicon.png" width="100" alt="Wide Play icon" />
+</p>
 
-<!-- TODO: add a hero screenshot or GIF here, e.g. docs/screenshots/hero.png -->
+> Turn a room full of phones into one synchronized speaker. One phone DJs; every other phone plays the same Spotify track at the same time — coordinated over Bluetooth Low Energy.
 
 ## What it does
 
@@ -12,11 +14,14 @@ There is **no audio streaming** between phones. Each phone plays independently f
 
 ## Demo
 
-| Home | Player (host) | Now Playing (listener) | Search |
-|------|---------------|------------------------|--------|
-| _scan / host / join_ | _controls + listener count_ | _read-only_ | _pick a track_ |
+| iOS — Home | iOS — Player (host) | iOS — Search | Android — Home |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshots/ios-home.png" width="180" /> | <img src="screenshots/ios-player.png" width="180" /> | <img src="screenshots/ios-search.png" width="180" /> | <img src="screenshots/android-home.jpg" width="180" /> |
 
-<!-- TODO: drop screenshots of the four screens into docs/screenshots/ and link them here -->
+<p align="center">
+  <img src="screenshots/ios-spotify-auth.png" width="180" alt="Spotify OAuth consent screen" />
+  <br><em>Spotify PKCE login — no client secret stored in the app</em>
+</p>
 
 ## Architecture
 
@@ -102,7 +107,7 @@ Real Spotify playback needs a Premium account and a Spotify Developer app; real 
 - [x] Real Spotify integration (PKCE OAuth, search, playback control)
 - [x] Real BLE integration (advertise + GATT host, scan + join peer)
 - [ ] Push notifications when a session starts nearby
-- [ ] On-device testing pass on physical iOS + Android hardware
+- [x] On-device testing pass on physical iOS + Android hardware
 
 ---
 
